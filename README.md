@@ -9,7 +9,8 @@ being typed (minimum 4 characters long).
 \*"Default" translations only  
 
 ## Requirements
-OmegaT 3.6.0 r8270 or later (only tested on trunk)
+- OmegaT 3.6.0 r8270 or later (only tested on trunk)
+- Java 1.7
 
 ## Obtaining
 Download the JAR from [Releases]
