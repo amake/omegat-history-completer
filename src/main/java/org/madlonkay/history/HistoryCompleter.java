@@ -44,7 +44,7 @@ public class HistoryCompleter extends AutoCompleterListView {
     private TMXEntry currentEntryTranslation;
     
     public HistoryCompleter() {
-        super("History Completer");
+        super("History");
         
         CoreEvents.registerProjectChangeListener(new IProjectEventListener() {
             @Override
