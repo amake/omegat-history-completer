@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.madlonkay.markov;
+package org.madlonkay.history;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,10 +28,10 @@ import org.omegat.core.CoreEvents;
 import org.omegat.core.events.IApplicationEventListener;
 import org.omegat.util.Preferences;
 
-public class MarkovInstaller {
+public class HistoryInstaller {
     
-    static final String MARKOV_TRANSLATOR_PREFERENCE = "allow_markov_translator";
-    static final String MENU_ITEM_TITLE = "Markov Completer";
+    static final String HISTORY_COMPLETER_PREFERENCE = "allow_history_completer";
+    static final String MENU_ITEM_TITLE = "History Completer";
 
     public static void loadPlugins() {
         CoreEvents.registerApplicationEventListener(new IApplicationEventListener() {
@@ -47,13 +47,13 @@ public class MarkovInstaller {
     }
 
     private static void install() {
-        Core.getEditor().getAutoCompleter().addView(new MarkovCompleter());
+        Core.getEditor().getAutoCompleter().addView(new HistoryCompleter());
         JCheckBoxMenuItem item = new JCheckBoxMenuItem(MENU_ITEM_TITLE);
-        item.setSelected(Preferences.isPreference(MARKOV_TRANSLATOR_PREFERENCE));
+        item.setSelected(Preferences.isPreference(HISTORY_COMPLETER_PREFERENCE));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Preferences.setPreference(MARKOV_TRANSLATOR_PREFERENCE, ((AbstractButton) e.getSource()).isSelected());
+                Preferences.setPreference(HISTORY_COMPLETER_PREFERENCE, ((AbstractButton) e.getSource()).isSelected());
             }
         });
         Core.getMainWindow().getMainMenu().getAutoCompletionMenu().add(item);

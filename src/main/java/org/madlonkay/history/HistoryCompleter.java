@@ -15,13 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.madlonkay.markov;
+package org.madlonkay.history;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
@@ -33,22 +30,21 @@ import org.omegat.core.events.IProjectEventListener;
 import org.omegat.gui.editor.autocompleter.AutoCompleterItem;
 import org.omegat.gui.editor.autocompleter.AutoCompleterListView;
 import org.omegat.tokenizer.ITokenizer;
+import org.omegat.tokenizer.ITokenizer.StemmingMode;
 import org.omegat.util.Preferences;
 import org.omegat.util.Token;
+import org.trie4j.patricia.PatriciaTrie;
 
-public class MarkovCompleter extends AutoCompleterListView {
+public class HistoryCompleter extends AutoCompleterListView {
 
-    private static final int LEVEL = 5;
-    private static final int SUGGESTIONS = 5;
-    
-    private static final Random RAND = new Random(); 
-    
-    private final Map<String, ArrayList<Integer>> data = new HashMap<String, ArrayList<Integer>>();
+    private static final int MIN_SEED_LENGTH = 3;
+
+    private PatriciaTrie data;
     private SourceTextEntry currentEntry;
     private TMXEntry currentEntryTranslation;
     
-    public MarkovCompleter() {
-        super("Markov Completer");
+    public HistoryCompleter() {
+        super("History Completer");
         
         CoreEvents.registerProjectChangeListener(new IProjectEventListener() {
             @Override
@@ -77,7 +73,7 @@ public class MarkovCompleter extends AutoCompleterListView {
     }
     
     private void train() {
-        data.clear();
+        data = new PatriciaTrie();
         Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
             @Override
             public void iterate(String source, TMXEntry trans) {
@@ -90,23 +86,14 @@ public class MarkovCompleter extends AutoCompleterListView {
         if (text == null) {
             return;
         }
-        if (text.codePointCount(0, text.length()) < LEVEL + 1) {
+        if (text.codePointCount(0, text.length()) < MIN_SEED_LENGTH + 1) {
             return;
         }
-        
-        for (int cp, i = text.offsetByCodePoints(0, LEVEL), len = text.length(); i <= len; i += Character.charCount(cp)) {
-            if (i == len) {
-                cp = '\0';
-            } else {                
-                cp = text.codePointAt(i);
+        ITokenizer tokenizer = getTokenizer();
+        for (String token : tokenizer.tokenizeWordsToStrings(text, StemmingMode.NONE)) {
+            if (token.codePointCount(0, token.length()) > MIN_SEED_LENGTH) {
+                data.insert(token);
             }
-            String key = text.substring(text.offsetByCodePoints(i, -LEVEL), i);
-            ArrayList<Integer> chain = data.get(key);
-            if (chain == null) {
-                chain = new ArrayList<Integer>();
-                data.put(key, chain);
-            }
-            chain.add(cp);
         }
     }
     
@@ -117,53 +104,38 @@ public class MarkovCompleter extends AutoCompleterListView {
         for (int i = tokens.length - 1; i >= 0; i--) {
             Token lastToken = tokens[i];
             String lastString = text.substring(lastToken.getOffset(), text.length()).trim();
-            if (lastString.codePointCount(0, lastString.length()) >= LEVEL) {
+            if (lastString.codePointCount(0, lastString.length()) >= MIN_SEED_LENGTH) {
                 return lastString;
             }
         }
         return null;
     }
     
-    private AutoCompleterItem generate(String prevText) {
+    private List<AutoCompleterItem> generate(String prevText) {
         String seed = getLastToken(prevText);
         if (seed == null) {
             seed = prevText;
         }
-        if (seed.codePointCount(0, seed.length()) < LEVEL) {
-            return null;
+        if (data == null || seed.codePointCount(0, seed.length()) < MIN_SEED_LENGTH) {
+            return new ArrayList<AutoCompleterItem>(1);
         }
-        StringBuilder sb = new StringBuilder(seed);
-        boolean didAppend = false;
-        while (true) {
-            String key = sb.substring(sb.offsetByCodePoints(sb.length(), -LEVEL), sb.length());
-            List<Integer> chain = data.get(key);
-            if (chain == null) {
-                break;
+
+        List<AutoCompleterItem> result = new ArrayList<AutoCompleterItem>();
+        for (String s : data.predictiveSearch(seed)) {
+            if (!s.equalsIgnoreCase(seed)) {
+                result.add(new AutoCompleterItem(s, null, seed.length()));
             }
-            int next = chain.get(RAND.nextInt(chain.size()));
-            if (next == '\0') {
-                break;
-            }
-            sb.appendCodePoint(next);
-            didAppend = true;
         }
-        return didAppend ? new AutoCompleterItem(sb.toString(), null, seed.length()) : null;
+        return result;
     }
     
     @Override
     public List<AutoCompleterItem> computeListData(String prevText,
             boolean contextualOnly) {
-        if (prevText.codePointCount(0, prevText.length()) < LEVEL) {
+        if (prevText.codePointCount(0, prevText.length()) < MIN_SEED_LENGTH) {
             return new ArrayList<AutoCompleterItem>(1);
         }
-        List<AutoCompleterItem> result = new ArrayList<AutoCompleterItem>(SUGGESTIONS);
-        for (int i = 0; i < SUGGESTIONS; i++) {
-            AutoCompleterItem suggestion = generate(prevText);
-            if (suggestion != null && !result.contains(suggestion)) {
-                result.add(suggestion);
-            }
-        }
-        return result;
+        return generate(prevText);
     }
 
     @Override
@@ -173,7 +145,7 @@ public class MarkovCompleter extends AutoCompleterListView {
 
     @Override
     public boolean shouldPopUp() {
-        return Preferences.isPreference(MarkovInstaller.MARKOV_TRANSLATOR_PREFERENCE)
+        return Preferences.isPreference(HistoryInstaller.HISTORY_COMPLETER_PREFERENCE)
                 && super.shouldPopUp();
     }
 }

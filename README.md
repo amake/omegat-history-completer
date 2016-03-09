@@ -1,21 +1,19 @@
-# omegat-markov-completer
-An autocompleter view backed by a Markov Generator (yes, it's a joke)
+# omegat-history-completer
+An autocompleter view that suggests words from existing translations in
+a project
 
-![screenshot](https://amake.github.io/omegat-markov-completer/screenshot.png)
-
-This autocompleter view generates suggestions via an order-5 (in characters)
-Markov generator trained on all existing translations* in the project. It is
-also trained on new translations as they are added**.
+This autocompleter view suggests words from existing translations* in
+the current project that share a common prefix with the word currently
+being typed (minimum 4 characters long).
 
 \*"Default" translations only  
-\*\*Changes to translations are ignored
 
 ## Requirements
 OmegaT 3.6.0 r8270 or later (only tested on trunk)
 
 ## Obtaining
 Download the JAR from [Releases]
-(https://github.com/amake/omegat-markov-completer/releases) or build yourself.
+(https://github.com/amake/omegat-history-completer/releases) or build yourself.
 
 ## Building
 Clone the repository, then run `mvn install`.
@@ -23,11 +21,15 @@ Clone the repository, then run `mvn install`.
 ## Installing
 1. Place the JAR in one of OmegaT's `plugins` directories (alongside
 `OmegaT.jar`, in the configuration directory, etc.).
-2. Enable the view in `Options` > `Auto-completion` > `Markov Completer`.
+2. Enable the view in `Options` > `Auto-completion` > `History Completer`.
+
+## Acknowledgments
+This project uses [trie4j](https://github.com/takawitter/trie4j) under the
+Apache License 2.0.
 
 ## License
 This project is distributed under the [GNU General Public License, v3]
 (http://www.gnu.org/licenses/gpl-3.0.html).
 
 
-Copyright 2015 Aaron Madlon-Kay <aaron@madlon-kay.com>
+Copyright 2016 Aaron Madlon-Kay <aaron@madlon-kay.com>
