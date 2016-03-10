@@ -12,4 +12,8 @@ public abstract class AutoCompleterListView extends AbstractAutoCompleterView {
     public boolean shouldPopUp() {
         return false;
     }
+
+    protected String getLastToken(String text) {
+        return null;
+    }
 }

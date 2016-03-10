@@ -32,7 +32,6 @@ import org.omegat.gui.editor.autocompleter.AutoCompleterListView;
 import org.omegat.tokenizer.ITokenizer;
 import org.omegat.tokenizer.ITokenizer.StemmingMode;
 import org.omegat.util.Preferences;
-import org.omegat.util.Token;
 import org.trie4j.patricia.PatriciaTrie;
 
 public class HistoryCompleter extends AutoCompleterListView {
@@ -95,20 +94,6 @@ public class HistoryCompleter extends AutoCompleterListView {
                 data.insert(token);
             }
         }
-    }
-    
-    protected String getLastToken(String text) {
-        ITokenizer tokenizer = getTokenizer();
-        Token[] tokens = tokenizer.tokenizeVerbatim(text);
-        
-        for (int i = tokens.length - 1; i >= 0; i--) {
-            Token lastToken = tokens[i];
-            String lastString = text.substring(lastToken.getOffset(), text.length()).trim();
-            if (lastString.codePointCount(0, lastString.length()) >= MIN_SEED_LENGTH) {
-                return lastString;
-            }
-        }
-        return null;
     }
     
     private List<AutoCompleterItem> generate(String prevText) {
