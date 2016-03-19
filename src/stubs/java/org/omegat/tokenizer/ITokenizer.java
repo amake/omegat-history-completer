@@ -9,5 +9,7 @@ public interface ITokenizer {
 
     public Token[] tokenizeVerbatim(String string);
 
+    String[] tokenizeVerbatimToStrings(String str);
+
     String[] tokenizeWordsToStrings(String str, StemmingMode stemmingMode);
 }

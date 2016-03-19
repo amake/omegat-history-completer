@@ -35,10 +35,12 @@ import org.omegat.util.Preferences;
 public class HistoryInstaller {
     
     static final String PREFERENCE_AUTOMATIC = "allow_history_completer";
-    static final String PREFERENCE_MIN_CHARS = "history_completer_min_chars";
+    static final String PREFERENCE_COMPLETION_MIN_CHARS = "history_completer_min_chars";
+    static final String PREFERENCE_PREDICTION_ENABLED = "history_completer_prediction_enabled";
     static final String MENU_TITLE = "History Completer";
-    static final String MENU_ITEM_ONOFF = "Suggest Automatically";
-    static final String MENU_ITEM_CHARS_LABEL = "Complete after:";
+    static final String MENU_ITEM_AUTOMATIC = "Suggest Automatically";
+    static final String MENU_ITEM_PREDICTION_ENABLED = "Predict Words";
+    static final String MENU_ITEM_CHARS_LABEL = "Complete words after:";
     static final String MENU_ITEM_NCHARS_ONE = "%d character";
     static final String MENU_ITEM_NCHARS_OTHER = "%d characters";
     static final int MIN_CHARS_MIN = 1;
@@ -58,11 +60,11 @@ public class HistoryInstaller {
     }
 
     private static void install() {
-        final HistoryCompleter completer = new HistoryCompleter();
-        Core.getEditor().getAutoCompleter().addView(completer);
+        final HistoryCompleter view = new HistoryCompleter();
+        Core.getEditor().getAutoCompleter().addView(view);
         JMenu menu = new JMenu(MENU_TITLE);
 
-        JMenuItem item = new JCheckBoxMenuItem(MENU_ITEM_ONOFF);
+        JMenuItem item = new JCheckBoxMenuItem(MENU_ITEM_AUTOMATIC);
         item.setSelected(Preferences.isPreference(PREFERENCE_AUTOMATIC));
         item.addActionListener(new ActionListener() {
             @Override
@@ -71,13 +73,28 @@ public class HistoryInstaller {
             }
         });
         menu.add(item);
+
         menu.addSeparator();
+
+        item = new JCheckBoxMenuItem(MENU_ITEM_PREDICTION_ENABLED);
+        item.setSelected(Preferences.isPreference(PREFERENCE_PREDICTION_ENABLED));
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.setPreference(PREFERENCE_PREDICTION_ENABLED, ((AbstractButton) e.getSource()).isSelected());
+            }
+        });
+        menu.add(item);
+
+        menu.addSeparator();
+
         item = new JMenuItem(MENU_ITEM_CHARS_LABEL);
         item.setEnabled(false);
         menu.add(item);
-        int minChars = Preferences.getPreferenceDefault(PREFERENCE_MIN_CHARS,
-                HistoryCompleter.DEFAULT_MIN_CHARS);
+
         ButtonGroup group = new ButtonGroup();
+        int minChars = Preferences.getPreferenceDefault(PREFERENCE_COMPLETION_MIN_CHARS,
+                WordCompleter.DEFAULT_MIN_CHARS);
         for (int i = MIN_CHARS_MIN; i <= MIN_CHARS_MAX; i++) {
             final int chars = i;
             item = new JRadioButtonMenuItem(
@@ -86,17 +103,16 @@ public class HistoryInstaller {
             item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    Preferences.setPreference(PREFERENCE_MIN_CHARS, chars);
-                    completer.minSeedLength = chars;
+                    Preferences.setPreference(PREFERENCE_COMPLETION_MIN_CHARS, chars);
+                    view.completer.minSeedLength = chars;
                     if (Core.getProject().isProjectLoaded()) {
-                        completer.train();
+                        view.train();
                     }
                 }
             });
             group.add(item);
             menu.add(item);
         }
-
 
         Core.getMainWindow().getMainMenu().getAutoCompletionMenu().add(menu);
     }

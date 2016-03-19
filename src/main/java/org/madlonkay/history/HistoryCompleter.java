@@ -29,21 +29,17 @@ import org.omegat.core.events.IEntryEventListener;
 import org.omegat.core.events.IProjectEventListener;
 import org.omegat.gui.editor.autocompleter.AutoCompleterItem;
 import org.omegat.gui.editor.autocompleter.AutoCompleterListView;
-import org.omegat.tokenizer.ITokenizer;
 import org.omegat.tokenizer.ITokenizer.StemmingMode;
 import org.omegat.util.Preferences;
-import org.trie4j.patricia.PatriciaTrie;
 
 public class HistoryCompleter extends AutoCompleterListView {
 
-    static final int DEFAULT_MIN_CHARS = 3;
 
-    private PatriciaTrie data;
+    WordCompleter completer = new WordCompleter();
+    WordPredictor predictor = new WordPredictor();
     private SourceTextEntry currentEntry;
     private TMXEntry currentEntryTranslation;
-    int minSeedLength = Preferences.getPreferenceDefault(HistoryInstaller.PREFERENCE_MIN_CHARS,
-            DEFAULT_MIN_CHARS);
-    
+
     public HistoryCompleter() {
         super("History");
         
@@ -74,7 +70,8 @@ public class HistoryCompleter extends AutoCompleterListView {
     }
     
     synchronized void train() {
-        data = new PatriciaTrie();
+        completer.reset();
+        predictor.reset();
         Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
             @Override
             public void iterate(String source, TMXEntry trans) {
@@ -87,42 +84,30 @@ public class HistoryCompleter extends AutoCompleterListView {
         if (text == null) {
             return;
         }
-        if (text.codePointCount(0, text.length()) < minSeedLength + 1) {
-            return;
-        }
-        ITokenizer tokenizer = getTokenizer();
-        for (String token : tokenizer.tokenizeWordsToStrings(text, StemmingMode.NONE)) {
-            if (token.codePointCount(0, token.length()) > minSeedLength) {
-                data.insert(token);
-            }
-        }
+        String[] tokens = getTokenizer().tokenizeWordsToStrings(text, StemmingMode.NONE);
+        
+        completer.train(text, tokens);
+        predictor.trainStringPrediction(text, tokens);
     }
-    
-    private List<AutoCompleterItem> generate(String prevText) {
-        String seed = getLastToken(prevText);
-        if (seed == null) {
-            seed = prevText;
-        }
-        if (data == null || seed.codePointCount(0, seed.length()) < minSeedLength) {
-            return new ArrayList<AutoCompleterItem>(1);
+
+    @Override
+    public List<AutoCompleterItem> computeListData(String prevText, boolean contextualOnly) {
+        if (prevText == null || prevText.isEmpty()) {
+            return new ArrayList<>(1);
         }
 
-        List<AutoCompleterItem> result = new ArrayList<AutoCompleterItem>();
-        for (String s : data.predictiveSearch(seed)) {
-            if (!s.equalsIgnoreCase(seed)) {
-                result.add(new AutoCompleterItem(s, null, seed.length()));
-            }
+        String[] tokens = getTokenizer().tokenizeVerbatimToStrings(prevText);
+
+        if (isWordCompletion(tokens)) {
+            return completer.completeWord(tokens);
+        } else if (Preferences.isPreference(HistoryInstaller.PREFERENCE_PREDICTION_ENABLED)) {
+            return predictor.predictWord(tokens);
         }
-        return result;
+        return new ArrayList<>(1);
     }
-    
-    @Override
-    public List<AutoCompleterItem> computeListData(String prevText,
-            boolean contextualOnly) {
-        if (prevText.codePointCount(0, prevText.length()) < minSeedLength) {
-            return new ArrayList<AutoCompleterItem>(1);
-        }
-        return generate(prevText);
+
+    private boolean isWordCompletion(String[] tokens) {
+        return !tokens[tokens.length - 1].trim().isEmpty();
     }
 
     @Override
