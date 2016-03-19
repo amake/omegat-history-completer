@@ -34,10 +34,10 @@ import org.omegat.util.Preferences;
 
 public class HistoryInstaller {
     
-    static final String PREFERENCE_ENABLED = "allow_history_completer";
+    static final String PREFERENCE_AUTOMATIC = "allow_history_completer";
     static final String PREFERENCE_MIN_CHARS = "history_completer_min_chars";
     static final String MENU_TITLE = "History Completer";
-    static final String MENU_ITEM_ONOFF = "Enabled";
+    static final String MENU_ITEM_ONOFF = "Suggest Automatically";
     static final String MENU_ITEM_CHARS_LABEL = "Complete after:";
     static final String MENU_ITEM_NCHARS_ONE = "%d character";
     static final String MENU_ITEM_NCHARS_OTHER = "%d characters";
@@ -63,11 +63,11 @@ public class HistoryInstaller {
         JMenu menu = new JMenu(MENU_TITLE);
 
         JMenuItem item = new JCheckBoxMenuItem(MENU_ITEM_ONOFF);
-        item.setSelected(Preferences.isPreference(PREFERENCE_ENABLED));
+        item.setSelected(Preferences.isPreference(PREFERENCE_AUTOMATIC));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Preferences.setPreference(PREFERENCE_ENABLED, ((AbstractButton) e.getSource()).isSelected());
+                Preferences.setPreference(PREFERENCE_AUTOMATIC, ((AbstractButton) e.getSource()).isSelected());
             }
         });
         menu.add(item);
