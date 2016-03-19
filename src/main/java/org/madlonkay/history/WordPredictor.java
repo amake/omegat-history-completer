@@ -30,19 +30,19 @@ import org.omegat.gui.editor.autocompleter.AutoCompleterItem;
 public class WordPredictor {
     final static double MIN_FREQUENCY = 5d;
 
-    private Map<String, FrequencyStrings> predictionData;
+    private Map<String, FrequencyStrings> data;
 
     void reset() {
-        predictionData = new HashMap<>();
+        data = new HashMap<>();
     }
 
     void trainStringPrediction(String text, String[] tokens) {
         for (int i = 0; i < tokens.length - 1; i++) {
             String token = tokens[i];
-            FrequencyStrings strings = predictionData.get(token);
+            FrequencyStrings strings = data.get(token);
             if (strings == null) {
                 strings = new FrequencyStrings();
-                predictionData.put(token, strings);
+                data.put(token, strings);
             }
             strings.encounter(tokens[i + 1]);
         }
@@ -50,12 +50,12 @@ public class WordPredictor {
 
     List<AutoCompleterItem> predictWord(String[] tokens) {
         String seed = lastWordToken(tokens);
-        if (predictionData == null || seed == null) {
+        if (data == null || seed == null) {
             return new ArrayList<>(1);
         }
 
         List<AutoCompleterItem> result = new ArrayList<AutoCompleterItem>();
-        FrequencyStrings predictions = predictionData.get(seed);
+        FrequencyStrings predictions = data.get(seed);
         if (predictions == null) {
             return new ArrayList<>(1);
         }
