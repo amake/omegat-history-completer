@@ -12,4 +12,6 @@ public interface IProject {
     public interface DefaultTranslationsIterator {
         public void iterate(String source, TMXEntry trans);
     }
+
+    public boolean isProjectLoaded();
 }

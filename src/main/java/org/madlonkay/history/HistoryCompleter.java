@@ -36,11 +36,13 @@ import org.trie4j.patricia.PatriciaTrie;
 
 public class HistoryCompleter extends AutoCompleterListView {
 
-    private static final int MIN_SEED_LENGTH = 3;
+    static final int DEFAULT_MIN_CHARS = 3;
 
     private PatriciaTrie data;
     private SourceTextEntry currentEntry;
     private TMXEntry currentEntryTranslation;
+    int minSeedLength = Preferences.getPreferenceDefault(HistoryInstaller.PREFERENCE_MIN_CHARS,
+            DEFAULT_MIN_CHARS);
     
     public HistoryCompleter() {
         super("History");
@@ -71,7 +73,7 @@ public class HistoryCompleter extends AutoCompleterListView {
         });
     }
     
-    private void train() {
+    synchronized void train() {
         data = new PatriciaTrie();
         Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
             @Override
@@ -85,12 +87,12 @@ public class HistoryCompleter extends AutoCompleterListView {
         if (text == null) {
             return;
         }
-        if (text.codePointCount(0, text.length()) < MIN_SEED_LENGTH + 1) {
+        if (text.codePointCount(0, text.length()) < minSeedLength + 1) {
             return;
         }
         ITokenizer tokenizer = getTokenizer();
         for (String token : tokenizer.tokenizeWordsToStrings(text, StemmingMode.NONE)) {
-            if (token.codePointCount(0, token.length()) > MIN_SEED_LENGTH) {
+            if (token.codePointCount(0, token.length()) > minSeedLength) {
                 data.insert(token);
             }
         }
@@ -101,7 +103,7 @@ public class HistoryCompleter extends AutoCompleterListView {
         if (seed == null) {
             seed = prevText;
         }
-        if (data == null || seed.codePointCount(0, seed.length()) < MIN_SEED_LENGTH) {
+        if (data == null || seed.codePointCount(0, seed.length()) < minSeedLength) {
             return new ArrayList<AutoCompleterItem>(1);
         }
 
@@ -117,7 +119,7 @@ public class HistoryCompleter extends AutoCompleterListView {
     @Override
     public List<AutoCompleterItem> computeListData(String prevText,
             boolean contextualOnly) {
-        if (prevText.codePointCount(0, prevText.length()) < MIN_SEED_LENGTH) {
+        if (prevText.codePointCount(0, prevText.length()) < minSeedLength) {
             return new ArrayList<AutoCompleterItem>(1);
         }
         return generate(prevText);
@@ -130,7 +132,7 @@ public class HistoryCompleter extends AutoCompleterListView {
 
     @Override
     public boolean shouldPopUp() {
-        return Preferences.isPreference(HistoryInstaller.HISTORY_COMPLETER_PREFERENCE)
+        return Preferences.isPreference(HistoryInstaller.PREFERENCE_ENABLED)
                 && super.shouldPopUp();
     }
 }

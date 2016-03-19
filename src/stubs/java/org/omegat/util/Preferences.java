@@ -7,4 +7,8 @@ public class Preferences {
 
     public static void setPreference(String key, Object value) {
     }
+
+    public static int getPreferenceDefault(String key, int defaultValue) {
+        return 0;
+    }
 }
