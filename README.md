@@ -1,12 +1,12 @@
 # omegat-history-completer
-An autocompleter view that suggests words from existing translations in
+An autocompleter plugin that suggests words from existing translations in
 a project
 
-- **Completion:** As you type a word, the view suggests completions from words
-    found in existing translations in the current project.
-- **Prediction:** After typing a word and pressing space, the view suggests
-    words that have appeared elsewhere in the current project following the
-    previous word. The suggestions are sorted by frequency of use.
+- **Completion View:** As you type a word, this view suggests completions from
+    words found in existing translations in the current project.
+- **Prediction View:** This view suggests words that have appeared elsewhere in
+    the current project following the previous word. The suggestions are sorted
+    by frequency of use.
 
 ## Requirements
 - OmegaT 3.6.0 r8270 or later (only tested on trunk)
