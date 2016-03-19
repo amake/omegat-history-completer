@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.omegat.gui.editor.autocompleter.AutoCompleterItem;
 
@@ -56,8 +57,14 @@ public class WordPredictor {
         if (predictions == null) {
             return new ArrayList<>(1);
         }
-        for (String s : predictions.getSortedStrings()) {
-            result.add(new AutoCompleterItem(s, null, 0));
+        List<Entry<String, Integer>> entries = predictions.getSortedEntries();
+        int total = 0;
+        for (Entry<String, Integer> e : entries) {
+            total += e.getValue();
+        }
+        for (Entry<String, Integer> e : entries) {
+            long percent = Math.round(((double) e.getValue() / total) * 100);
+            result.add(new AutoCompleterItem(e.getKey(), new String[] { String.valueOf(percent) + "%" }, 0));
         }
         return result;
     }
@@ -82,19 +89,18 @@ public class WordPredictor {
             }
         }
 
-        public List<String> getSortedStrings() {
-            List<String> strings;
+        public List<Entry<String, Integer>> getSortedEntries() {
+            List<Entry<String, Integer>> entries;
             synchronized (map) {
-                strings = new ArrayList<>(map.size());
-                strings.addAll(map.keySet());
-                Collections.sort(strings, new Comparator<String>() {
-                    @Override
-                    public int compare(String o1, String o2) {
-                        return -Integer.compare(map.get(o1), map.get(o2));
-                    }
-                });
+                entries = new ArrayList<>(map.entrySet());
             }
-            return strings;
+            Collections.sort(entries, new Comparator<Entry<String, Integer>>() {
+                @Override
+                public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+                    return -Integer.compare(o1.getValue(), o2.getValue());
+                }
+            });
+            return entries;
         }
     }
 }

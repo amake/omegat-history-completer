@@ -112,7 +112,11 @@ public class HistoryCompleter extends AutoCompleterListView {
 
     @Override
     public String itemToString(AutoCompleterItem item) {
-        return item.payload;
+        if (item.extras != null) {
+            return "<html>" + item.payload + " <font color=\"gray\">(" + item.extras[0] + ")</font></html>";
+        } else {
+            return item.payload;
+        }
     }
 
     @Override
