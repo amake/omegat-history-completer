@@ -27,7 +27,7 @@ import org.trie4j.patricia.PatriciaTrie;
 public class WordCompleter {
 
     static final int DEFAULT_MIN_CHARS = 3;
-    int minSeedLength = Preferences.getPreferenceDefault(HistoryInstaller.PREFERENCE_COMPLETION_MIN_CHARS,
+    int minSeedLength = Preferences.getPreferenceDefault(Installer.PREFERENCE_COMPLETION_MIN_CHARS,
             DEFAULT_MIN_CHARS);
 
     private PatriciaTrie data;

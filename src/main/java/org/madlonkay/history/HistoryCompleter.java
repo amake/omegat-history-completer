@@ -129,7 +129,7 @@ public class HistoryCompleter extends AutoCompleterListView {
 
     @Override
     public boolean shouldPopUp() {
-        return Preferences.isPreference(HistoryInstaller.PREFERENCE_AUTOMATIC)
+        return Preferences.isPreference(Installer.PREFERENCE_AUTOMATIC)
                 && super.shouldPopUp();
     }
 }

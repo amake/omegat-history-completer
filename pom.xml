@@ -67,7 +67,7 @@
               <classpathPrefix>lib/</classpathPrefix>
             </manifest>
             <manifestEntries>
-              <OmegaT-Plugins>org.madlonkay.history.HistoryInstaller</OmegaT-Plugins>
+              <OmegaT-Plugins>org.madlonkay.history.Installer</OmegaT-Plugins>
               <OmegaT-Plugin>True</OmegaT-Plugin>
             </manifestEntries>
           </archive>

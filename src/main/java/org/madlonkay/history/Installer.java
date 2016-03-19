@@ -32,7 +32,7 @@ import org.omegat.core.CoreEvents;
 import org.omegat.core.events.IApplicationEventListener;
 import org.omegat.util.Preferences;
 
-public class HistoryInstaller {
+public class Installer {
     
     static final String PREFERENCE_AUTOMATIC = "allow_history_completer";
     static final String PREFERENCE_COMPLETION_MIN_CHARS = "history_completer_min_chars";
