@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.omegat.core.Core;
 import org.omegat.core.CoreEvents;
+import org.omegat.core.data.EntryKey;
 import org.omegat.core.data.IProject.DefaultTranslationsIterator;
+import org.omegat.core.data.IProject.MultipleTranslationsIterator;
 import org.omegat.core.data.SourceTextEntry;
 import org.omegat.core.data.TMXEntry;
 import org.omegat.core.events.IEntryEventListener;
@@ -75,6 +77,12 @@ public class HistoryCompleter extends AutoCompleterListView {
         Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
             @Override
             public void iterate(String source, TMXEntry trans) {
+                trainString(trans.translation);
+            }
+        });
+        Core.getProject().iterateByMultipleTranslations(new MultipleTranslationsIterator() {
+            @Override
+            public void iterate(EntryKey source, TMXEntry trans) {
                 trainString(trans.translation);
             }
         });
