@@ -28,6 +28,8 @@ import java.util.Map.Entry;
 import org.omegat.gui.editor.autocompleter.AutoCompleterItem;
 
 public class WordPredictor {
+    final static double MIN_FREQUENCY = 5d;
+
     private Map<String, FrequencyStrings> predictionData;
 
     void reset() {
@@ -63,8 +65,11 @@ public class WordPredictor {
             total += e.getValue();
         }
         for (Entry<String, Integer> e : entries) {
-            long percent = Math.round(((double) e.getValue() / total) * 100);
-            result.add(new AutoCompleterItem(e.getKey(), new String[] { String.valueOf(percent) + "%" }, 0));
+            double percent = ((double) e.getValue() / total) * 100;
+            if (percent >= MIN_FREQUENCY) {
+                result.add(new AutoCompleterItem(e.getKey(), new String[] { String.valueOf(Math.round(percent)) + "%" },
+                        0));
+            }
         }
         return result;
     }
