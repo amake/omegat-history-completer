@@ -49,7 +49,7 @@ public class WordPredictor {
     }
 
     List<AutoCompleterItem> predictWord(String[] tokens) {
-        String seed = lastWordToken(tokens);
+        String seed = lastFullWordToken(tokens);
         if (data == null || seed == null) {
             return new ArrayList<>(1);
         }
@@ -74,8 +74,16 @@ public class WordPredictor {
         return result;
     }
 
-    private String lastWordToken(String[] tokens) {
-        for (int i = tokens.length - 1; i >= 0; i--) {
+    /**
+     * Find the last <em>completed</em> word. That means ignoring the last token
+     * (which should be a partially input word) and then iterating backwards to
+     * find the first non-whitespace token.
+     * 
+     * @param tokens
+     * @return
+     */
+    private String lastFullWordToken(String[] tokens) {
+        for (int i = tokens.length - 2; i >= 0; i--) {
             String token = tokens[i];
             if (!token.trim().isEmpty()) {
                 return token;

@@ -62,6 +62,8 @@ public class Installer {
     private static void install() {
         final HistoryCompleter view = new HistoryCompleter();
         Core.getEditor().getAutoCompleter().addView(view);
+        HistoryPredictor predictor = new HistoryPredictor();
+        Core.getEditor().getAutoCompleter().addView(predictor);
         JMenu menu = new JMenu(MENU_TITLE);
 
         JMenuItem item = new JCheckBoxMenuItem(MENU_ITEM_AUTOMATIC);

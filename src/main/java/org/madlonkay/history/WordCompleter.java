@@ -46,8 +46,7 @@ public class WordCompleter {
         }
     }
 
-    List<AutoCompleterItem> completeWord(String[] tokens) {
-        String seed = tokens[tokens.length - 1];
+    List<AutoCompleterItem> completeWord(String seed) {
         if (data == null || seed.codePointCount(0, seed.length()) < minSeedLength) {
             return new ArrayList<>(1);
         }

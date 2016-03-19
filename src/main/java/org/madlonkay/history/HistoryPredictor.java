@@ -34,15 +34,15 @@ import org.omegat.gui.editor.autocompleter.AutoCompleterListView;
 import org.omegat.tokenizer.ITokenizer.StemmingMode;
 import org.omegat.util.Preferences;
 
-public class HistoryCompleter extends AutoCompleterListView {
+public class HistoryPredictor extends AutoCompleterListView {
 
 
-    WordCompleter completer = new WordCompleter();
+    WordPredictor predictor = new WordPredictor();
     private SourceTextEntry currentEntry;
     private TMXEntry currentEntryTranslation;
 
-    public HistoryCompleter() {
-        super("History Completions");
+    public HistoryPredictor() {
+        super("History Predictions");
         
         CoreEvents.registerProjectChangeListener(new IProjectEventListener() {
             @Override
@@ -71,7 +71,7 @@ public class HistoryCompleter extends AutoCompleterListView {
     }
     
     synchronized void train() {
-        completer.reset();
+        predictor.reset();
         Core.getProject().iterateByDefaultTranslations(new DefaultTranslationsIterator() {
             @Override
             public void iterate(String source, TMXEntry trans) {
@@ -92,7 +92,7 @@ public class HistoryCompleter extends AutoCompleterListView {
         }
         String[] tokens = getTokenizer().tokenizeWordsToStrings(text, StemmingMode.NONE);
         
-        completer.train(text, tokens);
+        predictor.trainStringPrediction(text, tokens);
     }
 
     @Override
@@ -100,17 +100,40 @@ public class HistoryCompleter extends AutoCompleterListView {
         if (prevText == null || prevText.isEmpty()) {
             return new ArrayList<>(1);
         }
-        return completer.completeWord(getLastToken(prevText));
+
+        String[] tokens = getTokenizer().tokenizeVerbatimToStrings(prevText);
+
+        List<AutoCompleterItem> predictions = predictor.predictWord(tokens);
+
+        if (predictions.isEmpty()) {
+            return predictions;
+        }
+
+        // We are starting a new word so all predictions are relevant
+        if (tokens[tokens.length - 1].trim().isEmpty()) {
+            return predictions;
+        }
+
+        // We have context to filter on
+        String context = tokens[tokens.length - 1];
+        List<AutoCompleterItem> result = new ArrayList<>();
+        for (AutoCompleterItem item : predictions) {
+            if (item.payload.startsWith(context) && !item.payload.equals(context)) {
+                result.add(new AutoCompleterItem(item.payload, item.extras, context.length()));
+            }
+        }
+        return result;
     }
 
     @Override
     public String itemToString(AutoCompleterItem item) {
-        return item.payload;
+        return "<html>" + item.payload + " <font color=\"gray\">(" + item.extras[0] + ")</font></html>";
     }
 
     @Override
     public boolean shouldPopUp() {
         return Preferences.isPreference(Installer.PREFERENCE_AUTOMATIC)
+                && Preferences.isPreference(Installer.PREFERENCE_PREDICTION_ENABLED)
                 && super.shouldPopUp();
     }
 }
