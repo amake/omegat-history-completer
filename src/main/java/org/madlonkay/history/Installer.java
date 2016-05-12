@@ -19,6 +19,8 @@ package org.madlonkay.history;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
@@ -116,7 +118,12 @@ public class Installer {
             menu.add(item);
         }
 
-        Core.getMainWindow().getMainMenu().getAutoCompletionMenu().add(menu);
+        try {
+            Core.getMainWindow().getMainMenu().getAutoCompletionMenu().add(menu);
+        } catch (Throwable ex) {
+            Logger.getLogger(Installer.class.getName()).log(Level.SEVERE,
+                    "Failed to install the History Completer menu. OmegaT 3.6+ is required.", ex);
+        }
     }
 
     public static void unloadPlugins() {
