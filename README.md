@@ -13,7 +13,7 @@ a project
 
 ## Requirements
 - OmegaT 3.6.0 r8270 or later, 4.0 r9022 or earlier
-- Java 1.7
+- Java 1.7 or later
 
 ## Obtaining
 Download the JAR from [Releases]
