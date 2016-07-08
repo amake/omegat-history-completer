@@ -1,3 +1,6 @@
+**Note: This plugin is included in OmegaT 4.0 r9023 and later. Do not use this
+  plugin with this or later versions.**
+
 # omegat-history-completer
 An autocompleter plugin that suggests words from existing translations in
 a project
@@ -9,7 +12,7 @@ a project
     by frequency of use.
 
 ## Requirements
-- OmegaT 3.6.0 r8270 or later (only tested on trunk)
+- OmegaT 3.6.0 r8270 or later, 4.0 r9022 or earlier
 - Java 1.7
 
 ## Obtaining
